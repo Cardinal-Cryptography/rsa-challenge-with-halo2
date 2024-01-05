@@ -1,0 +1,22 @@
+[package]
+name = "rsa_challenge"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+publish.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
+ink = { workspace = true }
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["std"]
+std = [
+    "ink/std",
+]
+ink-as-dependency = []

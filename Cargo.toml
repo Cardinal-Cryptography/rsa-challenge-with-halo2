@@ -1,7 +1,9 @@
 [workspace]
 resolver = "2"
 
-members = []
+members = [
+    "rsa_challenge",
+]
 
 [workspace.package]
 authors = ["Cardinal"]
@@ -13,3 +15,4 @@ repository = "https://github.com/Cardinal-Cryptography/rsa-challenge-with-halo2"
 version = "0.1.0"
 
 [workspace.dependencies]
+ink = { version = "5.0.0-rc", default-features = false }
