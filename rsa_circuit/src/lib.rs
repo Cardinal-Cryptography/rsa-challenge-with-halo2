@@ -4,10 +4,22 @@
 
 use halo2_proofs::{
     circuit::{Layouter, Value},
-    halo2curves::bn256::Fr,
+    halo2curves::{bn256::Fr, ff::PrimeField},
     plonk::{Circuit, ConstraintSystem, Error},
     standard_plonk::StandardPlonk,
 };
+
+#[cfg(test)]
+mod tests;
+
+/// Convert the public input from human-readable form to the scalar array.
+pub fn prepare_public_input(n: u128, account: [u8; 32]) -> [Fr; 3] {
+    [
+        Fr::from_u128(n),
+        Fr::from_u128(u128::from_le_bytes(account[..16].try_into().unwrap())),
+        Fr::from_u128(u128::from_le_bytes(account[16..].try_into().unwrap())),
+    ]
+}
 
 /// Circuit representing the RSA challenge.
 ///
