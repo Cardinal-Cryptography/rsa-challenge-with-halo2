@@ -10,6 +10,7 @@ mod tests;
 #[ink::contract(env = baby_liminal_extension::Environment)]
 pub mod rsa_contract {
     use baby_liminal_extension::KeyHash;
+    use ink::prelude::vec::Vec;
 
     #[ink(storage)]
     pub struct RsaContract {
@@ -36,16 +37,16 @@ pub mod rsa_contract {
 
         /// Report solution.
         #[ink(message)]
-        pub fn solve(&mut self) {
+        pub fn solve(&mut self, proof: Vec<u8>) {
             // We have to perform a trivial conversion between hash types (`KeyHash` cannot be stored directly in a
             // contract storage).
             let vk_id = KeyHash::from_slice(self.vk_id.as_ref());
 
             // If the verification succeeds, pay the reward and terminate contract.
-            if let Ok(()) =
-                self.env()
-                    .extension()
-                    .verify(vk_id, Default::default(), Default::default())
+            if let Ok(()) = self
+                .env()
+                .extension()
+                .verify(vk_id, proof, Default::default())
             {
                 let winner = self.env().caller();
                 self.env().terminate_contract(winner);
