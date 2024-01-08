@@ -11,6 +11,4 @@ version = "0.1.0"
 
 [dependencies]
 halo2_proofs = { git = "https://github.com/Cardinal-Cryptography/pse-halo2", branch = "substrate-compatible", default-features = false, features = ["mock-kzg-params"] }
-
-[dev-dependencies]
 rand = { version = "0.8.5" }
