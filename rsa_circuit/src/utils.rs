@@ -6,13 +6,18 @@ use halo2_proofs::{
         ff::PrimeField,
     },
     plonk::{keygen_pk, keygen_vk, ProvingKey, VerifyingKey},
-    poly::kzg::commitment::ParamsKZG,
+    poly::{commitment::Params, kzg::commitment::ParamsKZG},
+    standard_plonk::StandardPlonk,
+    SerdeFormat,
 };
 use rand::rngs::OsRng;
 
 use crate::RsaChallenge;
 
+const SERDE_FORMAT: SerdeFormat = SerdeFormat::RawBytesUnchecked;
+
 /// Initial setup artifacts including trusted setup, proving key and verifying key.
+#[derive(Clone, Debug)]
 pub struct Setup {
     /// Logarithm of the maximum number of rows in the PLONK table.
     pub k: u32,
@@ -22,6 +27,32 @@ pub struct Setup {
     pub vk: VerifyingKey<G1Affine>,
     /// Trusted setup.
     pub params: ParamsKZG<Bn256>,
+}
+
+impl Setup {
+    /// Serialize setup to raw bytes.
+    pub fn to_bytes(self) -> Vec<u8> {
+        let mut buffer = vec![];
+        self.params
+            .write_custom(&mut buffer, SERDE_FORMAT)
+            .expect("Failed to save SRS");
+        buffer.extend(self.pk.to_bytes(SERDE_FORMAT));
+        buffer
+    }
+
+    /// Deserialize setup from raw bytes.
+    pub fn from_bytes(buffer: &mut &[u8]) -> Self {
+        let params =
+            ParamsKZG::<Bn256>::read_custom(buffer, SERDE_FORMAT).expect("Failed to read SRS");
+        let pk = ProvingKey::<G1Affine>::from_bytes::<StandardPlonk>(buffer, SERDE_FORMAT)
+            .expect("Failed to read proving key");
+        Self {
+            k: params.k(),
+            vk: pk.get_vk().clone(),
+            pk,
+            params,
+        }
+    }
 }
 
 /// Run the initial setup phase (for SRS) and circuit processing (for keys).

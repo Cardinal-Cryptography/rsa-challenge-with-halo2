@@ -12,6 +12,7 @@ use halo2_proofs::{
     transcript::{
         Blake2bRead, Blake2bWrite, Challenge255, TranscriptReadBuffer, TranscriptWriterBuffer,
     },
+    SerdeFormat,
 };
 use rand::rngs::OsRng;
 
@@ -100,4 +101,18 @@ fn does_not_accept_incorrect_proof() {
         ..true_setup
     };
     assert!(verify(fake_setup).is_err());
+}
+
+#[test]
+fn setup_serialization_works() {
+    let setup = generate_setup(CIRCUIT_MAX_K);
+    let serialized = setup.clone().to_bytes();
+    let deserialized = Setup::from_bytes(&mut serialized.as_slice());
+
+    assert_eq!(setup.k, deserialized.k);
+    assert_eq!(setup.params.s_g2(), deserialized.params.s_g2());
+    assert_eq!(
+        setup.pk.to_bytes(SerdeFormat::RawBytesUnchecked),
+        deserialized.pk.to_bytes(SerdeFormat::RawBytesUnchecked)
+    );
 }
