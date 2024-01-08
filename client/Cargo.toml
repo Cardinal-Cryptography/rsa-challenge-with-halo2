@@ -1,0 +1,16 @@
+[package]
+name = "client"
+
+authors = ["Cardinal"]
+edition = "2021"
+homepage = "https://github.com/Cardinal-Cryptography/rsa-challenge-with-halo2"
+publish = false
+readme = "README.md"
+repository = "https://github.com/Cardinal-Cryptography/rsa-challenge-with-halo2"
+version = "0.1.0"
+
+[dependencies]
+clap = { version = "4.4.13", features = ["derive"] }
+#subxt = { version = "0.33.0" }
+
+rsa_circuit = { path = "../rsa_circuit" }
