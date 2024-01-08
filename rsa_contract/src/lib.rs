@@ -46,11 +46,21 @@ pub mod rsa_contract {
             if let Ok(()) = self
                 .env()
                 .extension()
-                .verify(vk_id, proof, Default::default())
+                .verify(vk_id, proof, self.prepare_public_input())
             {
                 let winner = self.env().caller();
                 self.env().terminate_contract(winner);
             }
+        }
+
+        /// Prepares the public input for the SNARK proof, which includes the number to factorize and the caller's
+        /// address (to prevent front-running attacks).
+        fn prepare_public_input(&self) -> Vec<u8> {
+            let mut input = Vec::new();
+            input.extend_from_slice(&self.n.to_le_bytes());
+            let caller = self.env().caller();
+            input.extend_from_slice(caller.as_ref());
+            input
         }
     }
 }
