@@ -111,9 +111,12 @@ impl SubmissionData {
     /// Deserialize submission data from raw bytes.
     pub fn from_bytes(buffer: &mut &[u8]) -> Self {
         let instances = [
-            Fr::from_bytes(buffer[..32].try_into().unwrap()).expect("Failed to read instance"),
-            Fr::from_bytes(buffer[32..64].try_into().unwrap()).expect("Failed to read instance"),
-            Fr::from_bytes(buffer[64..96].try_into().unwrap()).expect("Failed to read instance"),
+            Fr::from_bytes(buffer[..32].try_into().unwrap())
+                .unwrap_or_else(|| panic!("Failed to read instance")),
+            Fr::from_bytes(buffer[32..64].try_into().unwrap())
+                .unwrap_or_else(|| panic!("Failed to read instance")),
+            Fr::from_bytes(buffer[64..96].try_into().unwrap())
+                .unwrap_or_else(|| panic!("Failed to read instance")),
         ];
 
         Self {

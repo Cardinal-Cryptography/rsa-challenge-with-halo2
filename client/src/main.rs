@@ -1,7 +1,11 @@
-use std::fs::{read, write};
+use std::{
+    fs::{read, write},
+    path::Path,
+};
 
 use anyhow::{Context, Result};
 use clap::Parser;
+use contract_build::{BuildMode, ExecuteArgs, ManifestPath};
 use rsa_circuit::utils::{generate_proof, generate_setup, Account, Setup};
 use subxt::{dynamic::Value, ext::scale_value::Composite, OnlineClient, PolkadotConfig};
 
@@ -59,7 +63,27 @@ async fn main() -> Result<()> {
                 .await?;
             println!("✅ Registered verification key");
         }
-        Command::BuildContract => {}
+        Command::BuildContract => {
+            contract_build::execute(ExecuteArgs {
+                manifest_path: ManifestPath::new(
+                    Path::new(env!("CARGO_MANIFEST_DIR")).join("../rsa_contract/Cargo.toml"),
+                )?,
+                verbosity: Default::default(),
+                build_mode: BuildMode::Release,
+                features: Default::default(),
+                network: Default::default(),
+                build_artifact: Default::default(),
+                unstable_flags: Default::default(),
+                optimization_passes: None,
+                keep_debug_symbols: false,
+                dylint: false,
+                output_type: Default::default(),
+                skip_wasm_validation: false,
+                target: Default::default(),
+                max_memory_pages: 0,
+                image: Default::default(),
+            })?;
+        }
         Command::DeployContract => {}
         Command::SubmitSolution => {}
     }
