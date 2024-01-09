@@ -140,7 +140,7 @@ async fn main() -> Result<()> {
                 .done()
                 .await?;
             println!("⏳ Calling contract...");
-            let events = command.call(None).await.unwrap();
+            command.call(None).await.unwrap();
             println!("✅ Contract called");
         }
     }
