@@ -10,7 +10,10 @@ repository = "https://github.com/Cardinal-Cryptography/rsa-challenge-with-halo2"
 version = "0.1.0"
 
 [dependencies]
+anyhow = { version = "1.0.79" }
 clap = { version = "4.4.13", features = ["derive"] }
-#subxt = { version = "0.33.0" }
+subxt = { version = "0.32.1" }
+subxt-signer = { version = "0.32.1", features = ["subxt"] }
+tokio = { version = "1.35.1", features = ["rt-multi-thread"] }
 
 rsa_circuit = { path = "../rsa_circuit" }

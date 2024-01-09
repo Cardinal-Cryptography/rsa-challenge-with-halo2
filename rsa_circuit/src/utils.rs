@@ -60,6 +60,14 @@ impl Setup {
             params,
         }
     }
+
+    /// Serialize verifying key to raw bytes as it is expected by the on-chain verifier.
+    pub fn serialize_vk(&self) -> Vec<u8> {
+        let mut buffer = vec![];
+        buffer.extend(self.k.to_le_bytes());
+        buffer.extend(self.vk.to_bytes(SERDE_FORMAT));
+        buffer
+    }
 }
 
 /// Run the initial setup phase (for SRS) and circuit processing (for keys).
