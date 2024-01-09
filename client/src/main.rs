@@ -1,11 +1,14 @@
 use std::{
     fs::{read, write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use contract_build::{BuildMode, ExecuteArgs, ManifestPath};
+use contract_build::{
+    BuildMode, ExecuteArgs, ManifestPath, OptimizationPasses, DEFAULT_MAX_MEMORY_PAGES,
+};
+use contract_extrinsics::{BalanceVariant, ExtrinsicOptsBuilder, InstantiateCommandBuilder};
 use rsa_circuit::utils::{generate_proof, generate_setup, Account, Setup};
 use subxt::{dynamic::Value, ext::scale_value::Composite, OnlineClient, PolkadotConfig};
 
@@ -65,27 +68,42 @@ async fn main() -> Result<()> {
         }
         Command::BuildContract => {
             contract_build::execute(ExecuteArgs {
-                manifest_path: ManifestPath::new(
-                    Path::new(env!("CARGO_MANIFEST_DIR")).join("../rsa_contract/Cargo.toml"),
-                )?,
+                manifest_path: ManifestPath::new(get_contract_manifest().into())?,
                 verbosity: Default::default(),
                 build_mode: BuildMode::Release,
                 features: Default::default(),
                 network: Default::default(),
                 build_artifact: Default::default(),
                 unstable_flags: Default::default(),
-                optimization_passes: None,
+                optimization_passes: Some(OptimizationPasses::default()),
                 keep_debug_symbols: false,
                 dylint: false,
                 output_type: Default::default(),
                 skip_wasm_validation: false,
                 target: Default::default(),
-                max_memory_pages: 0,
+                max_memory_pages: DEFAULT_MAX_MEMORY_PAGES,
                 image: Default::default(),
             })?;
         }
-        Command::DeployContract => {}
+        Command::DeployContract { challenge, reward } => {
+            let command = InstantiateCommandBuilder::default()
+                .args(vec![challenge.to_string(), format!("{:?}", [0u8; 32])])
+                .value(BalanceVariant::Default(reward))
+                .extrinsic_opts(
+                    ExtrinsicOptsBuilder::default()
+                        .suri("//Alice")
+                        .manifest_path(Some(get_contract_manifest()))
+                        .done(),
+                )
+                .done()
+                .await?;
+            command.instantiate(None).await.unwrap();
+        }
         Command::SubmitSolution => {}
     }
     Ok(())
+}
+
+fn get_contract_manifest() -> impl Into<PathBuf> {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../rsa_contract/Cargo.toml")
 }

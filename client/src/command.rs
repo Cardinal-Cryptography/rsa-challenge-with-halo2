@@ -16,6 +16,9 @@ pub enum Command {
 
     // ------------ CONTRACT OPERATIONS --------------------------------------------------------------------------------
     BuildContract,
-    DeployContract,
+    DeployContract {
+        challenge: u128,
+        reward: u128,
+    },
     SubmitSolution,
 }
