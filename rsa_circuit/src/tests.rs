@@ -6,7 +6,7 @@ use halo2_proofs::{
     SerdeFormat,
 };
 
-use crate::utils::{generate_proof, generate_setup, prepare_public_input, Setup, SubmissionData};
+use crate::utils::{generate_proof, generate_setup, prepare_public_input, Setup};
 
 const CIRCUIT_MAX_K: u32 = 5;
 const ACCOUNT: [u8; 32] = [0u8; 32];
@@ -21,11 +21,11 @@ struct TestSetup {
 
 fn pipeline(p: u128, q: u128, account: [u8; 32]) -> TestSetup {
     let setup = generate_setup(CIRCUIT_MAX_K);
-    let data = generate_proof(&setup, p, q, account);
+    let proof = generate_proof(&setup, p, q, account);
 
     TestSetup {
-        proof: data.proof,
-        instances: data.instances,
+        proof,
+        instances: prepare_public_input(p * q, account),
         vk: setup.vk,
         params: setup.params,
     }
@@ -84,14 +84,4 @@ fn setup_serialization_works() {
         setup.pk.to_bytes(SerdeFormat::RawBytesUnchecked),
         deserialized.pk.to_bytes(SerdeFormat::RawBytesUnchecked)
     );
-}
-
-#[test]
-fn submission_data_serialization_works() {
-    let setup = generate_setup(CIRCUIT_MAX_K);
-    let data = generate_proof(&setup, 11, 13, ACCOUNT);
-    let serialized = data.clone().to_bytes();
-    let deserialized = SubmissionData::from_bytes(&mut serialized.as_slice());
-
-    assert_eq!(data, deserialized);
 }

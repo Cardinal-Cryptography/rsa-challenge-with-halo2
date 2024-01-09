@@ -7,12 +7,12 @@ use std::{
 use anyhow::{Context, Result};
 use clap::Parser;
 use contract_build::{
-    BuildMode, ExecuteArgs, ManifestPath, OptimizationPasses, DEFAULT_MAX_MEMORY_PAGES,
+    BuildMode, ExecuteArgs, ManifestPath, OptimizationPasses, Verbosity, DEFAULT_MAX_MEMORY_PAGES,
 };
 use contract_extrinsics::{
     BalanceVariant, CallCommandBuilder, ExtrinsicOptsBuilder, InstantiateCommandBuilder,
 };
-use rsa_circuit::utils::{generate_proof, generate_setup, Account, Setup};
+use rsa_circuit::utils::{generate_proof, generate_setup, Setup};
 use subxt::{
     config::{substrate::BlakeTwo256, Hasher},
     dynamic::Value,
@@ -26,7 +26,6 @@ use crate::command::Command;
 const CIRCUIT_MAX_K: u32 = 5;
 const SNARK_SETUP_FILE: &str = "snark-setup";
 const PROOF_FILE: &str = "submission-data";
-const ACCOUNT: Account = [0; 32];
 
 mod command;
 
@@ -51,14 +50,19 @@ async fn main() -> Result<()> {
             println!("✅ Loaded SNARK setup from `{SNARK_SETUP_FILE}`");
 
             println!("⏳ Generating SNARK proof...");
-            let proof = generate_proof(&setup, p, q, ACCOUNT);
+            let account = subxt_signer::sr25519::dev::alice()
+                .public_key()
+                .to_account_id()
+                .0;
+            let proof = generate_proof(&setup, p, q, account);
             println!("✅ Generated SNARK proof");
-            write(PROOF_FILE, proof.to_bytes()).context("Failed to save SNARK proof")?;
+            write(PROOF_FILE, proof).context("Failed to save SNARK proof")?;
             println!("💾 Saved SNARK proof to `{PROOF_FILE}`");
         }
         Command::RegisterVk => {
             println!("⏳ Preparing for verification key registration...");
             let vk_bytes = read_setup()?.serialize_vk();
+            println!("✅ Loaded vk from `{SNARK_SETUP_FILE}`");
 
             let api = OnlineClient::<PolkadotConfig>::new().await?;
             let call = subxt::dynamic::tx(
@@ -118,7 +122,7 @@ async fn main() -> Result<()> {
             println!("⏳ Instantiating contract...");
             let result = command.instantiate(None).await.unwrap();
             println!(
-                "✅ Contract deployed at address: {}",
+                "✅ Contract deployed at address: \x1b[1m{}\x1b[0m",
                 result.contract_address
             );
         }
@@ -140,8 +144,15 @@ async fn main() -> Result<()> {
                 .done()
                 .await?;
             println!("⏳ Calling contract...");
-            command.call(None).await.unwrap();
+            let events = command.call(None).await.unwrap();
             println!("✅ Contract called");
+
+            let event_log = events.display_events(Verbosity::Default, command.token_metadata())?;
+            if event_log.contains("ChallengeSolved") {
+                println!("✅ \x1b[1mChallenge solved!\x1b[0m");
+            } else {
+                println!("❌ \x1b[1mChallenge not solved, proof found to be incorrect\x1b[0m");
+            }
         }
     }
     Ok(())

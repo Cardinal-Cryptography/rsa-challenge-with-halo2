@@ -20,6 +20,11 @@ pub mod rsa_contract {
         vk_id: Hash,
     }
 
+    #[ink(event)]
+    pub struct ChallengeSolved;
+    #[ink(event)]
+    pub struct ChallengeStillTooHard;
+
     impl RsaContract {
         /// Creates a new RSA challenge contract.
         ///
@@ -48,8 +53,12 @@ pub mod rsa_contract {
                 .extension()
                 .verify(vk_id, proof, self.prepare_public_input())
             {
+                self.env().emit_event(ChallengeSolved);
+
                 let winner = self.env().caller();
                 self.env().terminate_contract(winner);
+            } else {
+                self.env().emit_event(ChallengeStillTooHard);
             }
         }
 

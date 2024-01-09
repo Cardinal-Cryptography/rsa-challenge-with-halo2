@@ -88,43 +88,8 @@ pub fn prepare_public_input(n: u128, account: Account) -> [Fr; 3] {
     ]
 }
 
-/// Proof accompanied by the public input (instance).
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub struct SubmissionData {
-    /// SNARK proof.
-    pub proof: Vec<u8>,
-    /// Public input.
-    pub instances: [Fr; 3],
-}
-
-impl SubmissionData {
-    /// Serialize submission data to raw bytes.
-    pub fn to_bytes(self) -> Vec<u8> {
-        let mut buffer = vec![];
-        for i in self.instances {
-            buffer.extend(i.to_bytes());
-        }
-        buffer.extend(self.proof);
-        buffer
-    }
-
-    /// Deserialize submission data from raw bytes.
-    pub fn from_bytes(buffer: &mut &[u8]) -> Self {
-        let instances = [
-            Fr::from_bytes(buffer[..32].try_into().unwrap()).unwrap(),
-            Fr::from_bytes(buffer[32..64].try_into().unwrap()).unwrap(),
-            Fr::from_bytes(buffer[64..96].try_into().unwrap()).unwrap(),
-        ];
-
-        Self {
-            instances,
-            proof: buffer[96..].to_vec(),
-        }
-    }
-}
-
-/// Generate proof together with public input given `setup`, `p`, `q` and `account`.
-pub fn generate_proof(setup: &Setup, p: u128, q: u128, account: Account) -> SubmissionData {
+/// Generate proof given `setup`, `p`, `q` and `account`.
+pub fn generate_proof(setup: &Setup, p: u128, q: u128, account: Account) -> Vec<u8> {
     let n = p * q;
     let circuit = RsaChallenge {
         p: Some(Fr::from_u128(p)),
@@ -142,7 +107,5 @@ pub fn generate_proof(setup: &Setup, p: u128, q: u128, account: Account) -> Subm
         &mut transcript,
     )
     .expect("Failed to generate proof");
-    let proof = transcript.finalize();
-
-    SubmissionData { proof, instances }
+    transcript.finalize()
 }
