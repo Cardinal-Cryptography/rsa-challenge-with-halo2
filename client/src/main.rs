@@ -10,7 +10,12 @@ use contract_build::{
 };
 use contract_extrinsics::{BalanceVariant, ExtrinsicOptsBuilder, InstantiateCommandBuilder};
 use rsa_circuit::utils::{generate_proof, generate_setup, Account, Setup};
-use subxt::{dynamic::Value, ext::scale_value::Composite, OnlineClient, PolkadotConfig};
+use subxt::{
+    config::{substrate::BlakeTwo256, Hasher},
+    dynamic::Value,
+    ext::scale_value::Composite,
+    OnlineClient, PolkadotConfig,
+};
 
 use crate::command::Command;
 
@@ -67,6 +72,7 @@ async fn main() -> Result<()> {
             println!("✅ Registered verification key");
         }
         Command::BuildContract => {
+            println!("⏳ Building contract...");
             contract_build::execute(ExecuteArgs {
                 manifest_path: ManifestPath::new(get_contract_manifest().into())?,
                 verbosity: Default::default(),
@@ -84,10 +90,18 @@ async fn main() -> Result<()> {
                 max_memory_pages: DEFAULT_MAX_MEMORY_PAGES,
                 image: Default::default(),
             })?;
+            println!("✅ Contract built");
         }
         Command::DeployContract { challenge, reward } => {
+            println!("⏳ Deploying contract...");
+            let setup = read_setup()?;
+
+            let vk_bytes = setup.serialize_vk();
+            println!("✅ Loaded vk from `{SNARK_SETUP_FILE}`");
+            let vk_hash = BlakeTwo256::hash(&vk_bytes);
+
             let command = InstantiateCommandBuilder::default()
-                .args(vec![challenge.to_string(), format!("{:?}", [0u8; 32])])
+                .args(vec![challenge.to_string(), format!("{vk_hash:?}")])
                 .value(BalanceVariant::Default(reward))
                 .extrinsic_opts(
                     ExtrinsicOptsBuilder::default()
@@ -97,7 +111,9 @@ async fn main() -> Result<()> {
                 )
                 .done()
                 .await?;
+            println!("⏳ Instantiating contract...");
             command.instantiate(None).await.unwrap();
+            println!("✅ Contract deployed");
         }
         Command::SubmitSolution => {}
     }
