@@ -9,8 +9,8 @@ use halo2_proofs::{
 use crate::utils::{generate_proof, generate_setup, prepare_public_input, Setup};
 
 const CIRCUIT_MAX_K: u32 = 5;
-const ACCOUNT: [u8; 32] = [0u8; 32];
-const FAKE_ACCOUNT: [u8; 32] = [1u8; 32];
+const ACCOUNT: [u8; 32] = [1u8; 32];
+const FAKE_ACCOUNT: [u8; 32] = [2u8; 32];
 
 struct TestSetup {
     proof: Vec<u8>,

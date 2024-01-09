@@ -3,9 +3,9 @@
 #![deny(missing_docs)]
 
 use halo2_proofs::{
-    circuit::{Layouter, Value},
+    circuit::{Layouter, Region, Value},
     halo2curves::bn256::Fr,
-    plonk::{Circuit, ConstraintSystem, Error},
+    plonk::{Circuit, Column, ConstraintSystem, Error, Fixed},
     standard_plonk::StandardPlonk,
 };
 
@@ -49,11 +49,37 @@ impl Circuit<Fr> for RsaChallenge {
         layouter.assign_region(
             || "",
             |mut region| {
-                region.assign_advice(|| "", config.a, 0, || Value::known(self.p.unwrap()))?;
-                region.assign_advice(|| "", config.b, 0, || Value::known(self.q.unwrap()))?;
-                region.assign_fixed(|| "", config.q_ab, 0, || Value::known(-Fr::one()))?;
+                // Check that `p*q = n`.
+                region.assign_advice(|| "p", config.a, 0, || Value::known(self.p.unwrap()))?;
+                region.assign_advice(|| "q", config.b, 0, || Value::known(self.q.unwrap()))?;
+                Self::negate_at_selector(&mut region, config.q_ab, || "p*q", 0)?;
+
+                // Zero out the rest of the instances just by negating them. This way we are ensuring that they will be
+                // embedded into the proof (committed to).
+                let ann1 = || "account low";
+                region.assign_advice_from_instance(ann1, config.instance, 1, config.a, 1)?;
+                Self::negate_at_selector(&mut region, config.q_a, ann1, 1)?;
+
+                let ann2 = || "account_high";
+                region.assign_advice_from_instance(ann2, config.instance, 2, config.a, 2)?;
+                Self::negate_at_selector(&mut region, config.q_a, ann2, 2)?;
+
                 Ok(())
             },
         )
+    }
+}
+
+impl RsaChallenge {
+    fn negate_at_selector(
+        region: &mut Region<Fr>,
+        selector: Column<Fixed>,
+        annotation: impl Fn() -> &'static str,
+        offset: usize,
+    ) -> Result<(), Error> {
+        let negated = || Value::known(-Fr::one());
+        let annotation = || format!("selector for {}", annotation());
+        region.assign_fixed(annotation, selector, offset, negated)?;
+        Ok(())
     }
 }
