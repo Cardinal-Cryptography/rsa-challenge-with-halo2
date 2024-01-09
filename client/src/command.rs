@@ -20,5 +20,7 @@ pub enum Command {
         challenge: u128,
         reward: u128,
     },
-    SubmitSolution,
+    SubmitSolution {
+        address: String,
+    },
 }

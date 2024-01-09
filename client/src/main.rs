@@ -1,6 +1,7 @@
 use std::{
     fs::{read, write},
     path::{Path, PathBuf},
+    str::FromStr,
 };
 
 use anyhow::{Context, Result};
@@ -8,12 +9,15 @@ use clap::Parser;
 use contract_build::{
     BuildMode, ExecuteArgs, ManifestPath, OptimizationPasses, DEFAULT_MAX_MEMORY_PAGES,
 };
-use contract_extrinsics::{BalanceVariant, ExtrinsicOptsBuilder, InstantiateCommandBuilder};
+use contract_extrinsics::{
+    BalanceVariant, CallCommandBuilder, ExtrinsicOptsBuilder, InstantiateCommandBuilder,
+};
 use rsa_circuit::utils::{generate_proof, generate_setup, Account, Setup};
 use subxt::{
     config::{substrate::BlakeTwo256, Hasher},
     dynamic::Value,
     ext::scale_value::Composite,
+    utils::AccountId32,
     OnlineClient, PolkadotConfig,
 };
 
@@ -94,11 +98,11 @@ async fn main() -> Result<()> {
         }
         Command::DeployContract { challenge, reward } => {
             println!("⏳ Deploying contract...");
-            let setup = read_setup()?;
 
+            let setup = read_setup()?;
             let vk_bytes = setup.serialize_vk();
-            println!("✅ Loaded vk from `{SNARK_SETUP_FILE}`");
             let vk_hash = BlakeTwo256::hash(&vk_bytes);
+            println!("✅ Loaded vk from `{SNARK_SETUP_FILE}`");
 
             let command = InstantiateCommandBuilder::default()
                 .args(vec![challenge.to_string(), format!("{vk_hash:?}")])
@@ -112,10 +116,33 @@ async fn main() -> Result<()> {
                 .done()
                 .await?;
             println!("⏳ Instantiating contract...");
-            command.instantiate(None).await.unwrap();
-            println!("✅ Contract deployed");
+            let result = command.instantiate(None).await.unwrap();
+            println!(
+                "✅ Contract deployed at address: {}",
+                result.contract_address
+            );
         }
-        Command::SubmitSolution => {}
+        Command::SubmitSolution { address } => {
+            println!("⏳ Submitting solution...");
+            let submission_data = read(PROOF_FILE).context("Failed to read SNARK proof")?;
+            println!("✅ Loaded SNARK proof from `{PROOF_FILE}`");
+
+            let command = CallCommandBuilder::default()
+                .contract(AccountId32::from_str(&address)?)
+                .message("solve")
+                .args(vec![format!("{submission_data:?}")])
+                .extrinsic_opts(
+                    ExtrinsicOptsBuilder::default()
+                        .suri("//Alice")
+                        .manifest_path(Some(get_contract_manifest()))
+                        .done(),
+                )
+                .done()
+                .await?;
+            println!("⏳ Calling contract...");
+            let events = command.call(None).await.unwrap();
+            println!("✅ Contract called");
+        }
     }
     Ok(())
 }
