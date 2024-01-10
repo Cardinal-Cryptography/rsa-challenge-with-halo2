@@ -111,3 +111,9 @@ In case our proof is invalid, we will get an error:
 ✅ Contract called
 ❌ Challenge not solved, proof found to be incorrect
 ```
+
+# Exploiting the contract
+
+The circuit itself has a little, but critical bug 🐛.
+It is possible to generate a valid proof for a wrong solution, that will be accepted by the contract.
+We encourage you to find this exploit and steal the reward!

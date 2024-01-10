@@ -21,6 +21,10 @@ pub mod utils;
 ///
 /// Since `account` is usually 256 bits long (`[u8; 32]`), we need to split it into two 128 bit chunks, so that we have
 /// certainty that both can be safely decoded as `Fr` elements.
+///
+/// # Exploit
+///
+/// The relation has a bugt, which allows to satisfy the circuit with an invalid solution. Try to find it!
 #[derive(Default)]
 pub struct RsaChallenge {
     /// First prime factor of the challenge.
