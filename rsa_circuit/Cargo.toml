@@ -10,5 +10,5 @@ repository = "https://github.com/Cardinal-Cryptography/rsa-challenge-with-halo2"
 version = "0.1.0"
 
 [dependencies]
-halo2_proofs = { git = "https://github.com/Cardinal-Cryptography/pse-halo2", branch = "substrate-compatible", default-features = false, features = ["mock-kzg-params"] }
+halo2_proofs = { git = "https://github.com/Cardinal-Cryptography/pse-halo2", branch = "aleph", default-features = false, features = ["mock-kzg-params"] }
 rand = { version = "0.8.5" }
