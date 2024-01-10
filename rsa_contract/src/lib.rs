@@ -66,14 +66,20 @@ pub mod rsa_contract {
         /// address (to prevent front-running attacks).
         fn prepare_public_input(&self) -> Vec<u8> {
             let mut input = Vec::new();
+
+            // First input is the number to factorize.
             input.extend(self.n.to_le_bytes());
-            input.extend([0u8; 16]);
+            input.extend([0u8; 16]); // `Fr` elements are 256-bit, so we need to pad the input.
+
+            // The second one is the caller's address. Since it might not be always convertible to `Fr`, we split it
+            // into two 128-bit chunks.
             let caller = self.env().caller();
             let caller_bytes: &[u8; 32] = caller.as_ref();
             input.extend(u128::from_le_bytes(caller_bytes[..16].try_into().unwrap()).to_le_bytes());
-            input.extend([0u8; 16]);
+            input.extend([0u8; 16]); // `Fr` elements are 256-bit, so we need to pad the input.
             input.extend(u128::from_le_bytes(caller_bytes[16..].try_into().unwrap()).to_le_bytes());
-            input.extend([0u8; 16]);
+            input.extend([0u8; 16]); // `Fr` elements are 256-bit, so we need to pad the input.
+
             input
         }
     }

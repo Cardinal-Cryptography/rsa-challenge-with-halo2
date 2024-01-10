@@ -12,7 +12,7 @@ use crate::tests::runtimes::RuntimeWithRejectingCE;
 
 const CHALLENGE: u128 = 41 * 43;
 const VK_ID: [u8; 32] = [0; 32];
-const REWARD: u128 = 1_000_000;
+const REWARD: u128 = 1_000_000_000;
 const PROOF: &[&str] = &["[0, 1, 2, 3]"];
 
 /// The account that will be used as a participant in the tests (the one that submits solutions).
@@ -23,7 +23,7 @@ enum BundleProvider {}
 
 /// Deploy the contract and return a `drink::Session` object with `PARTICIPANT` set to be the caller.
 ///
-/// Deployment is done by the Runtime's default account (potentially different than `PARTICIPANT`).
+/// Deployment is done by the Runtime's default account (potentially different from `PARTICIPANT`).
 fn setup<Runtime: RuntimeWithContracts>() -> Result<Session<Runtime>, Box<dyn Error>>
 where
     <<Runtime as drink::pallet_contracts::Config>::Currency as Inspect<

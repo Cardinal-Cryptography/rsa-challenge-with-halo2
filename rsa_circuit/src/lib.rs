@@ -19,7 +19,7 @@ pub mod utils;
 /// values should satisfy: `p * q = n`. The `account` instance is artificially included in the circuit to prevent
 /// front running attacks.
 ///
-/// Since `account` is usually 256 bits long (`[u8 ;32]`), we need to split it into two 128 bit chunks, so that we have
+/// Since `account` is usually 256 bits long (`[u8; 32]`), we need to split it into two 128 bit chunks, so that we have
 /// certainty that both can be safely decoded as `Fr` elements.
 #[derive(Default)]
 pub struct RsaChallenge {

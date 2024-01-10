@@ -23,10 +23,10 @@ const SERDE_FORMAT: SerdeFormat = SerdeFormat::RawBytesUnchecked;
 /// Type representing an identifier of the participant.
 pub type Account = [u8; 32];
 
-/// Initial setup artifacts including trusted setup, proving key and verifying key.
+/// Initial setup artifacts including trusted setup result, proving key and verifying key.
 #[derive(Clone, Debug)]
 pub struct Setup {
-    /// Logarithm of the maximum number of rows in the PLONK table.
+    /// Logarithm of the maximum number of rows in the PLONK table (polynomial degree).
     pub k: u32,
     /// Proving key.
     pub pk: ProvingKey<G1Affine>,
@@ -79,7 +79,7 @@ pub fn generate_setup(k: u32) -> Setup {
     Setup { k, pk, vk, params }
 }
 
-/// Convert the public input from human-readable form to the scalar array.
+/// Convert the public input from human-readable form to a scalar array.
 pub fn prepare_public_input(n: u128, account: Account) -> [Fr; 3] {
     [
         Fr::from_u128(n),
