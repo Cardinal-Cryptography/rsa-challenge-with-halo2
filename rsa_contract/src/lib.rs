@@ -66,9 +66,14 @@ pub mod rsa_contract {
         /// address (to prevent front-running attacks).
         fn prepare_public_input(&self) -> Vec<u8> {
             let mut input = Vec::new();
-            input.extend_from_slice(&self.n.to_le_bytes());
+            input.extend(self.n.to_le_bytes());
+            input.extend([0u8; 16]);
             let caller = self.env().caller();
-            input.extend_from_slice(caller.as_ref());
+            let caller_bytes: &[u8; 32] = caller.as_ref();
+            input.extend(u128::from_le_bytes(caller_bytes[..16].try_into().unwrap()).to_le_bytes());
+            input.extend([0u8; 16]);
+            input.extend(u128::from_le_bytes(caller_bytes[16..].try_into().unwrap()).to_le_bytes());
+            input.extend([0u8; 16]);
             input
         }
     }

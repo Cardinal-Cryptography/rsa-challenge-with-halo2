@@ -73,7 +73,7 @@ impl Setup {
 /// Run the initial setup phase (for SRS) and circuit processing (for keys).
 pub fn generate_setup(k: u32) -> Setup {
     let circuit = RsaChallenge::default();
-    let params = ParamsKZG::<Bn256>::setup(k, OsRng);
+    let params = ParamsKZG::<Bn256>::setup(k, ParamsKZG::<Bn256>::mock_rng());
     let vk = keygen_vk(&params, &circuit).expect("vk generation should not fail");
     let pk = keygen_pk(&params, vk.clone(), &circuit).expect("pk generation should not fail");
     Setup { k, pk, vk, params }

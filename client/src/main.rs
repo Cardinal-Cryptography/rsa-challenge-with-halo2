@@ -128,13 +128,13 @@ async fn main() -> Result<()> {
         }
         Command::SubmitSolution { address } => {
             println!("⏳ Submitting solution...");
-            let submission_data = read(PROOF_FILE).context("Failed to read SNARK proof")?;
+            let proof = read(PROOF_FILE).context("Failed to read SNARK proof")?;
             println!("✅ Loaded SNARK proof from `{PROOF_FILE}`");
 
             let command = CallCommandBuilder::default()
                 .contract(AccountId32::from_str(&address)?)
                 .message("solve")
-                .args(vec![format!("{submission_data:?}")])
+                .args(vec![format!("{proof:?}")])
                 .extrinsic_opts(
                     ExtrinsicOptsBuilder::default()
                         .suri("//Alice")
