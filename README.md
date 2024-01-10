@@ -117,3 +117,9 @@ In case our proof is invalid, we will get an error:
 The circuit itself has a little, but critical bug 🐛.
 It is possible to generate a valid proof for a wrong solution, that will be accepted by the contract.
 We encourage you to find this exploit and steal the reward!
+
+# Launching a local chain
+
+In order to launch a local Aleph Zero chain with ZK utilities, you can either:
+- run a single-node chain with Docker: simply run `./launch-chain.sh`,
+- or run `./scripts/run_nodes.sh --liminal` on the `main` branch from [`aleph-zero`](https://github.com/Cardinal-Cryptography/aleph-node) repository.
