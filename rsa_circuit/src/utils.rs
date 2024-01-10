@@ -1,6 +1,7 @@
 //! Helpers for working with the RSA circuit.
 
 use halo2_proofs::{
+    arithmetic::Field,
     halo2curves::{
         bn256::{Bn256, Fr, G1Affine},
         ff::PrimeField,
@@ -93,7 +94,15 @@ pub fn generate_proof(setup: &Setup, p: u128, q: u128, account: Account) -> Vec<
     let n = p * q;
     let circuit = RsaChallenge {
         p: Some(Fr::from_u128(p)),
+        #[cfg(not(test))]
+        p_dec_inv: Some(Fr::from_u128(p - 1).invert().unwrap()),
+        #[cfg(test)]
+        p_dec_inv: Some(Fr::from_u128(p - 1).invert().unwrap_or(Fr::zero())),
         q: Some(Fr::from_u128(q)),
+        #[cfg(not(test))]
+        q_dec_inv: Some(Fr::from_u128(q - 1).invert().unwrap()),
+        #[cfg(test)]
+        q_dec_inv: Some(Fr::from_u128(q - 1).invert().unwrap_or(Fr::zero())),
     };
     let instances = prepare_public_input(n, account);
 

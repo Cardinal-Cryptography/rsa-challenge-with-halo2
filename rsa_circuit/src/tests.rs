@@ -73,6 +73,12 @@ fn does_not_accept_incorrect_proof() {
 }
 
 #[test]
+fn does_not_accept_trivial_factorization() {
+    assert!(verify(pipeline(1, 13, ACCOUNT)).is_err());
+    assert!(verify(pipeline(13, 1, ACCOUNT)).is_err());
+}
+
+#[test]
 fn setup_serialization_works() {
     let setup = generate_setup(CIRCUIT_MAX_K);
     let serialized = setup.clone().to_bytes();
