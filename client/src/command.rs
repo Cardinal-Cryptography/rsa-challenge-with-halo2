@@ -24,3 +24,14 @@ pub enum Command {
         address: String,
     },
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Command::command().debug_assert()
+    }
+}
