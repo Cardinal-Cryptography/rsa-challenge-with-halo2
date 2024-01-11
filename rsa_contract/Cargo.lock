@@ -401,7 +401,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 [[package]]
 name = "baby-liminal-extension"
 version = "0.1.0"
-source = "git+https://github.com/Cardinal-Cryptography/aleph-node?branch=halo2-verifier#73f6c0b72720dbae8ba5c0b2108fe99647bc7402"
+source = "git+https://github.com/Cardinal-Cryptography/aleph-node?rev=f8de357#f8de3576225fa265271837422e215b72702b7b9d"
 dependencies = [
  "ink",
  "sp-core 21.0.0",

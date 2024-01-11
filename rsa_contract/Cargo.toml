@@ -14,7 +14,7 @@ path = "src/lib.rs"
 
 [dependencies]
 ink = { version = "5.0.0-rc", default-features = false }
-baby-liminal-extension = { git = "https://github.com/Cardinal-Cryptography/aleph-node", branch = "halo2-verifier", features = ["ink"] }
+baby-liminal-extension = { git = "https://github.com/Cardinal-Cryptography/aleph-node", rev = "f8de357", features = ["ink"] }
 
 [dev-dependencies]
 drink = { version = "0.8.5" }
