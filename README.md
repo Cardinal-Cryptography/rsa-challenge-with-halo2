@@ -123,3 +123,5 @@ We encourage you to find this exploit and steal the reward!
 In order to launch a local Aleph Zero chain with ZK utilities, you can either:
 - run a single-node chain with Docker: simply run `./launch-chain.sh`,
 - or run `./scripts/run_nodes.sh --liminal` on the `main` branch from [`aleph-zero`](https://github.com/Cardinal-Cryptography/aleph-node) repository.
+
+Mac users might experience some networking issues with the Docker image, so we recommend the latter option.
