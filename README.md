@@ -37,11 +37,11 @@ The [rsa_circuit](./rsa_circuit) directory contains the circuit crate.
 It is written with Aleph Zero's halo2 fork.
 It also exposes some utilities for generating proofs and data serialization (please notice, that some conventions that are expected from the on-chain verifier are sometimes still very implicit).
 
-# Client
+# Client (Local Node)
 
 In the [client](./client) directory you can find a simple CLI that interacts with the whole system.
-Let us assume that we have a running node at `ws://localhost:9944`.
-Then, we can run an experiment as follows:
+Here we assume that a local node is running and exposes a ws endpoint `ws://localhost:9944` (see the [Instructions](#launching-a-local-chain) below). If you want to use a public zk devnet instead, try the instruction in the next section).
+We can run an experiment as follows:
 
 ```bash
 cd client/
@@ -111,6 +111,52 @@ In case our proof is invalid, we will get an error:
 ✅ Contract called
 ❌ Challenge not solved, proof found to be incorrect
 ```
+
+# Client (ZK Devnet)
+
+We repeat the above instructions, but this time running on a public devnet (no local node required). The developer dashboard for this devnet is available under the link: https://dev.azero.dev/?rpc=wss%3A%2F%2Fws-fe-zk.dev.azero.dev#/explorer note that this is running with a custom ws endpoint `wss://ws-fe-zk.dev.azero.dev/`.
+
+ In order to succeed, you must generate an account and save the seed phrase (12 words) (we will assume you keep it in `YOUR_PHRASE` variable). Then you must make sure that your new account has funds, by getting them from the faucet available at https://faucet-fe-zk.dev.azero.dev/. If you have trouble with any of the steps, please visit the builders channel in Aleph Zero discord https://discord.com/invite/alephzero.
+
+ We provide a short summary of the steps given in the previous section.
+
+```bash
+cd client/
+# We build the client.
+cargo build --release
+
+# We generate the SNARK setup (SRS, proving and verifying keys).
+./target/release/client setup-snark
+
+# We register the verification key in the vk-storage pallet.
+./target/release/client register-vk --phrase=YOUR_PHRASE --url=wss://ws-fe-zk.dev.azero.dev/
+
+
+# We build the contract.
+./target/release/client build-contract
+
+# We deploy the RSA contract. First argument is the number to factorize, second is the reward.
+./target/release/client deploy-contract 1763 1000000000 --phrase=YOUR_PHRASE --url=wss://ws-fe-zk.dev.azero.dev/
+
+# We generate a proof for the factors 41 and 43.
+./target/release/client generate-proof 41 43 --phrase=YOUR_PHRASE
+
+# We submit the proof to the contract. We have to pass the contract address as an argument (it was printed after the deployment).
+./target/release/client submit-solution CONTRACT_ADDRESS
+
+```
+
+In case our proof is invalid, we will get an error:
+
+```bash
+⏳ Submitting solution...
+✅ Loaded SNARK proof from `submission-data`
+⏳ Calling contract...
+✅ Contract called
+❌ Challenge not solved, proof found to be incorrect
+```
+
+
 
 # Exploiting the contract
 
