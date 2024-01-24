@@ -24,6 +24,7 @@ mod chain_ops;
 mod circuit_ops;
 mod command;
 mod contract_ops;
+mod signer;
 
 fn read_setup() -> Result<Setup> {
     let setup_serialized = read(SNARK_SETUP_FILE).context("Failed to read SNARK setup")?;
@@ -36,15 +37,20 @@ fn read_setup() -> Result<Setup> {
 async fn main() -> Result<()> {
     match Command::parse() {
         Command::SetupSnark => run_snark_setup()?,
-        Command::GenerateProof { p, q } => run_proof_generation(p, q)?,
-        Command::RegisterVk => run_vk_registration().await?,
+        Command::GenerateProof { p, q, phrase } => run_proof_generation(p, q, phrase)?,
+        Command::RegisterVk { url, phrase } => run_vk_registration(url, phrase).await?,
         Command::BuildContract => run_contract_build()?,
-        Command::DeployContract { challenge, reward } => {
-            run_contract_deployment(challenge, reward).await?
-        }
-        Command::SubmitSolution { address } => {
-            run_submission(AccountId32::from_str(&address)?).await?
-        }
+        Command::DeployContract {
+            challenge,
+            reward,
+            url,
+            phrase,
+        } => run_contract_deployment(challenge, reward, url, phrase).await?,
+        Command::SubmitSolution {
+            address,
+            url,
+            phrase,
+        } => run_submission(AccountId32::from_str(&address)?, url, phrase).await?,
     }
     Ok(())
 }

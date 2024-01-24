@@ -2,9 +2,8 @@ use std::fs::write;
 
 use anyhow::{Context, Result};
 use rsa_circuit::utils::{generate_proof, generate_setup};
-use subxt_signer::sr25519::dev::alice;
 
-use crate::{read_setup, CIRCUIT_MAX_K, PROOF_FILE, SNARK_SETUP_FILE};
+use crate::{read_setup, signer::signer_from_phrase, CIRCUIT_MAX_K, PROOF_FILE, SNARK_SETUP_FILE};
 
 pub fn run_snark_setup() -> Result<()> {
     println!("⏳ Generating SNARK setup...");
@@ -16,11 +15,13 @@ pub fn run_snark_setup() -> Result<()> {
     Ok(())
 }
 
-pub fn run_proof_generation(p: u128, q: u128) -> Result<()> {
+pub fn run_proof_generation(p: u128, q: u128, phrase: String) -> Result<()> {
     println!("⏳ Preparing for SNARK proof generation...");
     let setup = read_setup()?;
 
-    let account = alice().public_key().to_account_id().0;
+    let signer = signer_from_phrase(phrase)?;
+
+    let account = signer.public_key().to_account_id().0;
     println!("⏳ Generating SNARK proof...");
     let proof = generate_proof(&setup, p, q, account);
     println!("✅ Generated SNARK proof");

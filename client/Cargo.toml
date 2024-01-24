@@ -19,3 +19,4 @@ subxt-signer = { version = "0.32.1", features = ["subxt"] }
 tokio = { version = "1.35.1", features = ["rt-multi-thread"] }
 
 rsa_circuit = { path = "../rsa_circuit" }
+url = "2.5.0"

@@ -8,20 +8,35 @@ pub enum Command {
     GenerateProof {
         p: u128,
         q: u128,
+        #[clap(long, default_value = "//Alice")]
+        phrase: String,
     },
 
     // ------------ CHAIN OPERATIONS -----------------------------------------------------------------------------------
     /// Register verifying key on the blockchain.
-    RegisterVk,
+    RegisterVk {
+        #[clap(long, default_value = "ws://localhost:9944")]
+        url: url::Url,
+        #[clap(long, default_value = "//Alice")]
+        phrase: String,
+    },
 
     // ------------ CONTRACT OPERATIONS --------------------------------------------------------------------------------
     BuildContract,
     DeployContract {
         challenge: u128,
         reward: u128,
+        #[clap(long, default_value = "ws://localhost:9944")]
+        url: url::Url,
+        #[clap(long, default_value = "//Alice")]
+        phrase: String,
     },
     SubmitSolution {
         address: String,
+        #[clap(long, default_value = "ws://localhost:9944")]
+        url: url::Url,
+        #[clap(long, default_value = "//Alice")]
+        phrase: String,
     },
 }
 

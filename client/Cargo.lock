@@ -895,6 +895,7 @@ dependencies = [
  "subxt",
  "subxt-signer",
  "tokio",
+ "url",
 ]
 
 [[package]]

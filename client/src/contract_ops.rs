@@ -11,6 +11,7 @@ use subxt::{
     config::{substrate::BlakeTwo256, Hasher},
     utils::AccountId32,
 };
+use url::Url;
 
 use crate::{get_contract_manifest, read_setup, PROOF_FILE};
 
@@ -27,7 +28,12 @@ pub fn run_contract_build() -> Result<()> {
     Ok(())
 }
 
-pub async fn run_contract_deployment(challenge: u128, reward: u128) -> Result<()> {
+pub async fn run_contract_deployment(
+    challenge: u128,
+    reward: u128,
+    url: Url,
+    phrase: String,
+) -> Result<()> {
     println!("⏳ Deploying contract...");
 
     let setup = read_setup()?;
@@ -38,7 +44,8 @@ pub async fn run_contract_deployment(challenge: u128, reward: u128) -> Result<()
         .value(BalanceVariant::Default(reward))
         .extrinsic_opts(
             ExtrinsicOptsBuilder::default()
-                .suri("//Alice")
+                .suri(phrase)
+                .url(url)
                 .manifest_path(Some(get_contract_manifest()))
                 .done(),
         )
@@ -54,7 +61,7 @@ pub async fn run_contract_deployment(challenge: u128, reward: u128) -> Result<()
     Ok(())
 }
 
-pub async fn run_submission(address: AccountId32) -> Result<()> {
+pub async fn run_submission(address: AccountId32, url: Url, phrase: String) -> Result<()> {
     println!("⏳ Submitting solution...");
     let proof = read(PROOF_FILE).context("Failed to read SNARK proof")?;
     println!("✅ Loaded SNARK proof from `{PROOF_FILE}`");
@@ -65,7 +72,8 @@ pub async fn run_submission(address: AccountId32) -> Result<()> {
         .args(vec![format!("{proof:?}")])
         .extrinsic_opts(
             ExtrinsicOptsBuilder::default()
-                .suri("//Alice")
+                .suri(phrase)
+                .url(url)
                 .manifest_path(Some(get_contract_manifest()))
                 .done(),
         )
