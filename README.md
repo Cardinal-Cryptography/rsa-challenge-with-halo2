@@ -142,7 +142,7 @@ cargo build --release
 ./target/release/client generate-proof 41 43 --phrase=YOUR_PHRASE
 
 # We submit the proof to the contract. We have to pass the contract address as an argument (it was printed after the deployment).
-./target/release/client submit-solution CONTRACT_ADDRESS
+./target/release/client submit-solution CONTRACT_ADDRESS --phrase=YOUR_PHRASE --url=wss://ws-fe-zk.dev.azero.dev/
 
 ```
 
