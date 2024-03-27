@@ -71,7 +71,7 @@ export_bootnode_address() {
 }
 
 run_snarkeling_node() {
-  NODE_PUBKEY=$ADMIN_PUBKEY docker-compose -f docker-compose.yml up --remove-orphans -d
+  NODE_PUBKEY=$ADMIN_PUBKEY docker compose -f docker-compose.yml up --remove-orphans -d
   log_progress "✅ Successfully launched snarkeling node"
 }
 
